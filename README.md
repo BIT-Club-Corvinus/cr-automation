@@ -8,6 +8,6 @@ A BIT Club Corvinus initiative to automatize in-house corporate relation process
 - Anaconda includes the Spyder IDE and other useful Python solutions
 
 # tutorials
-Python in one video tutorial: https://youtu.be/H1elmMBnykA
-Pandas: https://youtu.be/iGFdh6_FePU
-Basic example of Pywin32: https://youtu.be/rE2v-FopUkw
+- Python in one video tutorial: https://youtu.be/H1elmMBnykA
+- Pandas: https://youtu.be/iGFdh6_FePU
+- Basic example of Pywin32: https://youtu.be/rE2v-FopUkw
