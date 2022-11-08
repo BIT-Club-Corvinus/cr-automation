@@ -39,12 +39,24 @@ inbox = mapi.GetDefaultFolder(6)
 messages = inbox.Items
 messages.Sort('ReceivedTime')
 length = len(messages)
-print('number of emails in inbox: '+str(length))
-print('last email from: ' + getSenderAddress(messages[length-1]))
-print('Subject: ' + messages[length-1].Subject)
-print('Content: '+ messages[length-1].Body) # messages[length-1].HTMLBody csak akkor mukodik ha HTML tartalmu emailt kaptunk
-print('Date: '+ messages.GetLast().SentOn.strftime("%Y.%m.%d"))
-print('Time: '+ messages[length-1].SentOn.strftime("%H:%M:%S"))
+# print('number of emails in inbox: '+str(length))
+# print('last email from: ' + getSenderAddress(messages[length-1]))
+# # print('Subject: ' + messages[length-1].Subject)
+# print('Content: '+ messages[length-1].Body) # messages[length-1].HTMLBody csak akkor mukodik ha HTML tartalmu emailt kaptunk
+# print('Date: '+ messages.GetLast().SentOn.strftime("%Y.%m.%d"))
+# print('Time: '+ messages[length-1].SentOn.strftime("%H:%M:%S"))
+
+
+cc1 = messages[length-1].Body
+# cc2 = cc1.split("Cc: ")[1].split("Subject: ")[0]
+
+import re
+# kukacok = [m.start() for m in re.finditer('@', cc2)]
+
+print(cc1)
+# print(kukacok)
+
+# for i in kukacok:
 
 
 # Kiírás excelbe
@@ -57,9 +69,14 @@ def write_excel():
 
     Recip = messages[length-1].Recipients
     for r in Recip:
-        Cc = str(Cc) + str(r.AddressEntry)
+        if r.AddressEntry.Type == "EX":
+            Cc = str(Cc) + str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress) + "; "
+        else:
+            Cc = str(Cc) + str(r.AddressEntry.Address)+ "; "
 
-    now =str(datetime.datetime.now().strftime("%d-%m-%Y_%H-%M"))
+    print(Recip)
+
+    now =str(datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S"))
 
     workbook = xlsxwriter.Workbook('last_mail_'+now+'.xlsx')
     worksheet = workbook.add_worksheet()
@@ -78,5 +95,9 @@ def write_excel():
     worksheet.write(2, 5, Time)
 
     workbook.close()
+
+write_excel()
+
+
 
 
