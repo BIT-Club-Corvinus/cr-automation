@@ -9,6 +9,7 @@ import win32com.client as client
 import xlsxwriter
 import datetime
 import pandas as pd
+import numpy as np
 
 outlook = client.Dispatch("Outlook.Application")
 mapi = outlook.GetNamespace("MAPI")
@@ -68,6 +69,19 @@ for i in range(sent_length):
         time = ""
     email = {'partner':sender, 'subject':subject, 'content':content, 'date':date, 'time':time}
     df = df.append(email, ignore_index = True)
+
+#Filter Teams invitations
+df.dropna(subset=['partner'], inplace = True)
+
+#df['Partner_domain'] = ""
+df['Partner_domain'] = df['partner'].str.split('@',1).str[1]
+
+#Filter other Teams and Akrivis messages
+df = df.loc[~df['Partner_domain'].str.contains("microsoft") & ~df['Partner_domain'].str.contains("akrivis")]
+
+df.info()
+
+df_pivot = pd.pivot_table(df,index=['Partner_domain'], values = ['date','time','subject'], aggfunc = np.max)
 
 # print('number of emails in inbox: '+str(length))
 # print('last email from: ' + getSenderAddress(messages[length-1]))
