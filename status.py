@@ -83,6 +83,10 @@ df.info()
 df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time'], aggfunc = np.max)
 df_pivot['subject_last_mail'] = df_pivot.merge(df,how='left',on='partner')['subject']
 
+#To do: a bit-sales email inboxára szűrve scraping
+#Kiírni Excelbe: distincten partnemailek, utolsó email subject, utolsó email dátum - idő, utolsó email óta eltelt napok száma, STÁTUSZ (lényeg)
+#STÁTUSZ lehetséges értékek: partner válaszolt, bit válaszolt
+
 
 # print('number of emails in inbox: '+str(length))
 # print('last email from: ' + getSenderAddress(messages[length-1]))
