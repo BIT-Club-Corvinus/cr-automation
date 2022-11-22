@@ -115,7 +115,7 @@ def write_txt_chat():
     x = 0
     for i in salesMessagesIn:
 
-        Recip = i.Recipiesnts
+        Recip = i.Recipients
         for r in Recip:
             if r.AddressEntry.Type == "EX":
                 CcIn.append(str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress))
@@ -126,6 +126,7 @@ def write_txt_chat():
         if x == 5:
             break
         x +=1
+
 
     CcIn = list(dict.fromkeys(CcIn))
     print(CcIn)
@@ -151,9 +152,22 @@ def write_txt_chat():
     CcOut = list(dict.fromkeys(CcOut))
     print(CcOut)
 
+    mergeCc = CcIn+CcOut
+    mergeCc = list(dict.fromkeys(mergeCc))
+    Partners = []
+    
+    #Partnerek kigyűjtése az alapján, hogy a mail címük nem bites
+    for i in mergeCc:
+        if  "bce.bitclub" not in i:
+            Partners.append(i)
+
+    print(Partners)
+
+
     #A mappa nevek és sorszámok kiírása (csak, hogy lássuk milyen mappák vannak)
     # for idx, folder in enumerate(mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders):
     #     print(idx+1, folder)
+
 
 
 write_txt_chat()
