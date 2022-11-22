@@ -103,28 +103,34 @@ def write_excel():
 
 
 def write_txt_chat():
+    # inbox elemek megszerzése
     salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
+    #elküldött elemek megszerzése (valamiért csak 3 elem van benne)
     salesMessagesOut = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(4).Items
     print(salesMessagesOut.Count)
 
+
+    # bejövő CC-k kigyűjtése listába, hogy később ezek alapján tudjuk szűrni a maileket
     CcIn = []
     x = 0
     for i in salesMessagesIn:
 
-        Recip = i.Recipients
+        Recip = i.Recipiesnts
         for r in Recip:
             if r.AddressEntry.Type == "EX":
                 CcIn.append(str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress))
             else:
                 CcIn.append(str(r.AddressEntry.Address))
 
+        #gyorsabb futás érdekében csak az első 5 mail elemzése egyenlőre
         if x == 5:
             break
         x +=1
-        
+
     CcIn = list(dict.fromkeys(CcIn))
     print(CcIn)
 
+    # Elküldött CC-k kigyűjtése listába, hogy később ezek alapján tudjuk szűrni a maileket
     CcOut = []
     x = 0
     for i in salesMessagesOut:
@@ -136,15 +142,18 @@ def write_txt_chat():
             else:
                 CcOut.append(str(r.AddressEntry.Address))
 
+        #gyorsabb futás érdekében csak az első 5 mail elemzése egyenlőre
         if x == 5:
             break
         x +=1
-        
+
+    # Duplikációk törlése    
     CcOut = list(dict.fromkeys(CcOut))
     print(CcOut)
 
-    for idx, folder in enumerate(mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders):
-        print(idx+1, folder)
+    #A mappa nevek és sorszámok kiírása (csak, hogy lássuk milyen mappák vannak)
+    # for idx, folder in enumerate(mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders):
+    #     print(idx+1, folder)
 
 
 write_txt_chat()
