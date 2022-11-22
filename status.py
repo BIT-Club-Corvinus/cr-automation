@@ -80,7 +80,9 @@ df = df.loc[~df['partner'].str.contains("microsoft") & ~df['partner'].str.contai
 
 df.info()
 
-df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject'], aggfunc = np.max)
+df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time'], aggfunc = np.max)
+df_pivot['subject_last_mail'] = df_pivot.merge(df,how='left',on='partner')['subject']
+
 
 # print('number of emails in inbox: '+str(length))
 # print('last email from: ' + getSenderAddress(messages[length-1]))
