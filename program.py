@@ -12,7 +12,7 @@ import datetime
 outlook = client.Dispatch("Outlook.Application")
 mapi = outlook.GetNamespace("MAPI")
 
- # send an email
+# send an email
 # message =outlook.CreateItem(0)
 # message.Display()
 # message.To = "attila.edmond.izsak@bce.bitclub.hu"
@@ -21,7 +21,7 @@ mapi = outlook.GetNamespace("MAPI")
 # message.Send()
 
 
- # read an email
+# read an email
 def getSenderAddress(msg):
     if msg.Class == 43:
         if msg.SenderEmailType == "EX":
@@ -34,8 +34,11 @@ def getSenderAddress(msg):
 # folder codes - https://learn.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
 
 
+
 #Szükséges adatok kinyerése
 inbox = mapi.GetDefaultFolder(6)
+outbox = mapi.GetDefaultFolder(5)
+outmessages = outbox.Items
 messages = inbox.Items
 messages.Sort('ReceivedTime')
 length = len(messages)
@@ -96,7 +99,55 @@ def write_excel():
 
     workbook.close()
 
-write_excel()
+# write_excel()
+
+
+def write_txt_chat():
+    salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
+    salesMessagesOut = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(4).Items
+    print(salesMessagesOut.Count)
+
+    CcIn = []
+    x = 0
+    for i in salesMessagesIn:
+
+        Recip = i.Recipients
+        for r in Recip:
+            if r.AddressEntry.Type == "EX":
+                CcIn.append(str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress))
+            else:
+                CcIn.append(str(r.AddressEntry.Address))
+
+        if x == 5:
+            break
+        x +=1
+        
+    CcIn = list(dict.fromkeys(CcIn))
+    print(CcIn)
+
+    CcOut = []
+    x = 0
+    for i in salesMessagesOut:
+
+        Recip = i.Recipients
+        for r in Recip:
+            if r.AddressEntry.Type == "EX":
+                CcOut.append(str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress))
+            else:
+                CcOut.append(str(r.AddressEntry.Address))
+
+        if x == 5:
+            break
+        x +=1
+        
+    CcOut = list(dict.fromkeys(CcOut))
+    print(CcOut)
+
+    for idx, folder in enumerate(mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders):
+        print(idx+1, folder)
+
+
+write_txt_chat()
 
 
 
