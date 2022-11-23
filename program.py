@@ -102,13 +102,15 @@ def write_excel():
 # write_excel()
 
 
+# A függvény futtatása nagyon hosszú idő, de elvileg működik
 def write_txt_chat():
     # inbox elemek megszerzése
     salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
     #elküldött elemek megszerzése (valamiért csak 3 elem van benne)
     salesMessagesOut = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(4).Items
-    print(salesMessagesOut.Count)
-
+    # print(salesMessagesIn.Count)
+    salesMessagesIn.Sort('ReceivedTime', True)
+    salesMessagesOut.Sort('ReceivedTime', True)
 
     # bejövő CC-k kigyűjtése listába, hogy később ezek alapján tudjuk szűrni a maileket
     CcIn = []
@@ -123,9 +125,9 @@ def write_txt_chat():
                 CcIn.append(str(r.AddressEntry.Address))
 
         #gyorsabb futás érdekében csak az első 5 mail elemzése egyenlőre
-        if x == 5:
-            break
-        x +=1
+        # if x == 15:
+        #     break
+        # x +=1
 
 
     CcIn = list(dict.fromkeys(CcIn))
@@ -144,9 +146,9 @@ def write_txt_chat():
                 CcOut.append(str(r.AddressEntry.Address))
 
         #gyorsabb futás érdekében csak az első 5 mail elemzése egyenlőre
-        if x == 5:
-            break
-        x +=1
+        # if x == 15:
+        #     break
+        # x +=1
 
     # Duplikációk törlése    
     CcOut = list(dict.fromkeys(CcOut))
@@ -155,14 +157,53 @@ def write_txt_chat():
     mergeCc = CcIn+CcOut
     mergeCc = list(dict.fromkeys(mergeCc))
     Partners = []
-    
+
     #Partnerek kigyűjtése az alapján, hogy a mail címük nem bites
     for i in mergeCc:
         if  "bce.bitclub" not in i:
             Partners.append(i)
 
-    print(Partners)
 
+
+    print(Partners)
+    
+
+    # írás a txt fájlba és a szöveg törzsek darabolása
+    y = 0
+    for p in Partners:
+        s = ""
+        # Fájl nyitása az adott partner nevével
+        f = open(p+".txt","w+", encoding="utf-8")
+
+        # Végignézzük az összes üzenetet
+        for m in salesMessagesIn:
+            CcTemp = []
+            Recip = m.Recipients
+            # Minden üzenetben megnézzük a CC-ket és ideiglenesen tároljuk
+            for r in Recip:
+                if r.AddressEntry.Type == "EX":
+                    CcTemp.append(str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress))
+                else:
+                    CcTemp.append(str(r.AddressEntry.Address))
+            #az aktuális üzenet CC-it össze hasonlítjuk az átalunk választott partnerrel
+            # Ha egyezik a fájlba írjuk
+            if p in CcTemp:
+                sTemp = m.Body
+
+                # Ha "From: " van a szövegben, akkor ott vágjuk a stringet és így az első elem az új üzenet
+                if "From: " in sTemp:
+                    sTemp = sTemp.split("From: ")
+                    s = s + "\n" + sTemp[0]
+                else:
+                    s = s + "\n" + sTemp
+            # if y == 15:
+            #     break
+            # y +=1
+        #     print(CcTemp)
+        # print(p)
+        
+        f.write(s)
+        f.close()
 
     #A mappa nevek és sorszámok kiírása (csak, hogy lássuk milyen mappák vannak)
     # for idx, folder in enumerate(mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders):
@@ -170,8 +211,12 @@ def write_txt_chat():
 
 
 
-write_txt_chat()
 
+# write_txt_chat()
+
+# salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
+# print("##################################################################################")
+# print(salesMessagesIn[salesMessagesIn.length-1].Body)
 
 
 
