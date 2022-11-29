@@ -188,14 +188,14 @@ def write_txt_chat():
             #az aktuális üzenet CC-it össze hasonlítjuk az átalunk választott partnerrel
             # Ha egyezik a fájlba írjuk
             if p in CcTemp:
-                sTemp = m.Body
+                mBody = m.Body
 
                 # Ha "From: " van a szövegben, akkor ott vágjuk a stringet és így az első elem az új üzenet
-                if "From: " in sTemp:
-                    sTemp = sTemp.split("From: ")
-                    s = s + "\n" + sTemp[0]
+                if "From: " in mBody:
+                    mBody = mBody.split("From: ")
+                    s = s + "\n" + mBody[0]
                 else:
-                    s = s + "\n" + sTemp
+                    s = s + "\n" + mBody
             # if y == 15:
             #     break
             # y +=1
@@ -212,11 +212,51 @@ def write_txt_chat():
 
 
 
-# write_txt_chat()
+def write_txt_chat2():
+    # Bejövő mailek kinyerése
+    salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
+    salesMessagesIn.Sort('ReceivedTime', True)
 
-# salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
-# print("##################################################################################")
-# print(salesMessagesIn[salesMessagesIn.length-1].Body)
+    #Itt tároljuk azokat 
+    CcTemp = []
+    #Végig megyünk a bejövő maileken
+    for m in salesMessagesIn:
+        Recip = m.Recipients
+        mBody = m.Body
+        #Végig megyünk az aktuális üzenet CC-in
+        for r in Recip:
+            if (r.AddressEntry.Type == "EX"):
+                p = str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress)
+                #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
+                if ("@bce.bitclub.hu" not in p) and ("@bitclub.hu" not in p):
+                    mBody = write_file(mBody, p)
+
+            else:
+                p = str(r.AddressEntry.Address)
+                #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
+                if ("@bce.bitclub.hu" not in p) and ("@bitclub.hu" not in p):
+                    mBody = write_file(mBody, p)
+
+def write_file(mBody, p):
+    
+    s = ""
+    f = open(p +".txt","a+", encoding="utf-8")
+    if "From: " in mBody:
+        mBody = mBody.split("From: ")
+        s = s + "\n" + mBody[0]
+    else:
+        # mBody = str(mBody)
+        try:
+            s = s + "\n" + "-----------------------------------------------------" + "\n" + mBody
+        except:
+            s = s + "\n" + "-----------------------------------------------------" + "\n" + mBody[0]
+    f.write(s)
+    f.close()
+    return mBody
+
+write_txt_chat2()
+
+
 
 
 
