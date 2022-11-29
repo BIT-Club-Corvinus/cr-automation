@@ -14,7 +14,7 @@ import numpy as np
 
 outlook = client.Dispatch("Outlook.Application")
 mapi = outlook.GetNamespace("MAPI")
-df = pd.DataFrame(columns = ['partner','subject', 'date','time'])
+df = pd.DataFrame(columns = ['partner','subject', 'date','time','státusz'])
 current_date = datetime.now()
 
 # read an email
@@ -44,11 +44,35 @@ inbox_messages = salesMessagesIn.Items
 inbox_messages.Sort('ReceivedTime')
 inbox_length = len(inbox_messages)
 
+statusz = {}
+
+
 for i in range(inbox_length):
     try:
+        print("valami")
         sender = getSenderAddress(inbox_messages[i])
     except:
+        print("Semmi")
         sender = None
+    bitvalaszolt = False
+    try:
+        if "bitclub.hu" in sender:
+            recip = inbox_messages[i].Recipients[0]
+            if recip.AddressEntry.Type == "EX":
+                recip = str(recip.AddressEntry.GetExchangeUser().PrimarySmtpAddress)
+            else:
+                recip = str(recip.AddressEntry.Address)
+            print(type(recip))
+            if recip not in statusz:
+                
+                statusz[recip] = "Bit válaszolt"
+                bitvalaszolt = True
+        else:
+            if sender not in statusz:
+                statusz[sender] = "Partner válaszolt" 
+                bitvalaszolt = False
+    except:
+        pass
     subject = inbox_messages[i].Subject
     try:
         date = inbox_messages[i].SentOn.strftime("%Y.%m.%d")
@@ -56,7 +80,7 @@ for i in range(inbox_length):
     except:
         date = ""
         time = ""
-    email = {'partner':sender, 'subject':subject, 'date':date, 'time':time}
+    email = {'partner':sender, 'subject':subject, 'date':date, 'time':time, 'státusz': bitvalaszolt}
     df_email_temp = pd.DataFrame([email])
     df = pd.concat([df,df_email_temp], ignore_index = True)
     
@@ -68,10 +92,11 @@ df.dropna(subset=['partner'], inplace = True)
 #Filter other Teams and Akrivis messages
 df = df.loc[~df['partner'].str.contains("teams.microsoft") & ~df['partner'].str.contains("akrivis")]
 
-df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject'], aggfunc = np.max)
+df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject','státusz'], aggfunc = np.max)
 df_pivot = df_pivot.reset_index()
 df_pivot['days_since_last_mail'] = (current_date - pd.to_datetime(df_pivot['date'])).dt.days
-df_pivot = df_pivot.reindex(columns = ["partner","date","time","subject","days_since_last_mail"])
+df_pivot = df_pivot.reindex(columns = ["partner","date","time","subject","days_since_last_mail","státusz"])
+
 
 # df_pivot.info()
 # df.info()
