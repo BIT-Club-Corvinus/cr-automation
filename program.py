@@ -5,9 +5,14 @@ Uncommenteljetek a ket reszbol az egyiket az egyeni teszteleshez
 
 # pip install pywin32 
 # csak windows-on lehet dolgozni
+from asyncio import sleep
 import win32com.client as client
 import xlsxwriter
 import datetime
+import os
+import datetime
+
+import time
 
 outlook = client.Dispatch("Outlook.Application")
 mapi = outlook.GetNamespace("MAPI")
@@ -213,13 +218,17 @@ def write_txt_chat():
 
 
 def write_txt_chat2():
+
+    nowdate = datetime.datetime.now()
+    nowdate = nowdate.strftime("%d_%m_%Y_%Hh%Mm%Ss")
+    nowdate = str(nowdate)
+    os.makedirs(nowdate)
+    time.sleep(2)
     # Bejövő mailek kinyerése
     salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2).Items
     salesMessagesIn.Sort('ReceivedTime', True)
-
-    #Itt tároljuk azokat 
-    CcTemp = []
     #Végig megyünk a bejövő maileken
+
     for m in salesMessagesIn:
         Recip = m.Recipients
         mBody = m.Body
@@ -227,23 +236,52 @@ def write_txt_chat2():
         for r in Recip:
             if (r.AddressEntry.Type == "EX"):
                 p = str(r.AddressEntry.GetExchangeUser().PrimarySmtpAddress)
+                p = p.split('@')
+                p = p [1]
                 #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
-                if ("@bce.bitclub.hu" not in p) and ("@bitclub.hu" not in p):
-                    mBody = write_file(mBody, p)
+                if ("@ce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
+                    mBody = write_file(mBody, p, nowdate)
 
             else:
                 p = str(r.AddressEntry.Address)
-                #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
-                if ("@bce.bitclub.hu" not in p) and ("@bitclub.hu" not in p):
-                    mBody = write_file(mBody, p)
+                p = p.split('@')
+                p = p [1]
 
-def write_file(mBody, p):
+                #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
+                if ("bce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
+                    mBody = write_file(mBody, p, nowdate)
+        
+        try:
+            if m.SenderEmailType == "EX":
+                p = m.Sender.GetExchangeUser().PrimarySmtpAddress
+            else:
+                p = m.SenderEmailAddress 
+
+            p = p.split("@")
+            p = p[1]
+
+            if ("bce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
+                mBody = write_file(mBody, p, nowdate)
+        except:
+            print(p)
+            print("Nem rendes mail.")
+
+        if p == "veeva.com":
+            print(mBody)
+            print("/////////////////////////////////////////////////////////////////////////////////////////////")
+
+    
+
+def write_file(mBody, p, nowdate):
     
     s = ""
-    f = open(p +".txt","a+", encoding="utf-8")
+    f = open(f"{nowdate}\{p}.txt","a+", encoding="utf-8")
     if "From: " in mBody:
         mBody = mBody.split("From: ")
-        s = s + "\n" + mBody[0]
+        s = s + "\n" + "-----------------------------------------------------" + "\n" + mBody[0]
+    elif "bce.bitclub.hu" in mBody:
+        mBody = mBody.split("bce.bitclub.hu")
+        s = s + "\n" + "-----------------------------------------------------" + "\n" + mBody[0]
     else:
         # mBody = str(mBody)
         try:
