@@ -23,8 +23,17 @@ def getSenderAddress(msg):
         if msg.SenderEmailType == "EX":
             return msg.Sender.GetExchangeUser().PrimarySmtpAddress
         else:
-            return msg.SenderEmailAddress 
+            return msg.SenderEmailAddress
 
+def WriteExcel():
+    try:
+        now =str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        df_pivot.to_excel("Status_"+now+".xlsx", index = False)
+        print("Writing done")
+    except BaseException as ex:
+        print(f'Error in writing Excel output: {ex}, {type(ex)}')
+        return
+    
 # folder codes - https://learn.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
 
 
@@ -53,45 +62,21 @@ for i in range(inbox_length):
     
 
 
-    
-#Sent email inbox
-# sent = mapi.GetDefaultFolder(5)
-# sent_messages = sent.Items
-# sent_messages.Sort('ReceivedTime')
-# sent_length = len(sent_messages)
-
-# for i in range(sent_length):
-#     recip = ""
-#     for recipents in sent_messages[i].Recipients:
-#         recip = recip + ' ' + recipents.Address
-#     subject = sent_messages[i].Subject
-#     content = sent_messages[i].Body
-#     email = {'partner':recip, 'subject':subject, 'content':content}
-#     try:
-#         date = sent_messages[i].SentOn.strftime("%Y.%m.%d")
-#         time = sent_messages[i].SentOn.strftime("%H:%M:%S")
-#     except:
-#         date = ""
-#         time = ""
-#     email = {'partner':sender, 'subject':subject, 'content':content, 'date':date, 'time':time}
-#     df = df.append(email, ignore_index = True)
-
 #Filter Teams invitations
 df.dropna(subset=['partner'], inplace = True)
-
-
 
 #Filter other Teams and Akrivis messages
 df = df.loc[~df['partner'].str.contains("teams.microsoft") & ~df['partner'].str.contains("akrivis")]
 
-
-
 df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject'], aggfunc = np.max)
 df_pivot = df_pivot.reset_index()
-df_pivot['Utolsó mail óta eltelt napok'] = (current_date - pd.to_datetime(df_pivot['date'])).dt.days
+df_pivot['days_since_last_mail'] = (current_date - pd.to_datetime(df_pivot['date'])).dt.days
+df_pivot = df_pivot.reindex(columns = ["partner","date","time","subject","days_since_last_mail"])
 
-df_pivot.info()
-df.info()
+# df_pivot.info()
+# df.info()
+
+WriteExcel()
 
 #To do: a bit-sales email inboxára szűrve scraping
 #Kiírni Excelbe: distincten partnemailek, utolsó email subject, utolsó email dátum - idő, utolsó email óta eltelt napok száma, STÁTUSZ (lényeg)
