@@ -86,19 +86,8 @@ df = df.loc[~df['partner'].str.contains("teams.microsoft") & ~df['partner'].str.
 
 
 
-df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time'], aggfunc = np.max)
+df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject'], aggfunc = np.max)
 df_pivot = df_pivot.reset_index()
-temp = pd.DataFrame()
-temp = pd.merge(df_pivot,df,how='left',on = 'partner')
-temp1 = pd.DataFrame()
-temp2 = pd.DataFrame()
-temp1['partner'] = df_pivot['partner'].copy()
-temp2['partner'] = temp['partner'].copy()
-temp2['subject'] = temp['subject'].copy()
-temp3 = pd.DataFrame()
-temp3 = pd.merge(temp1,temp2,how = 'left',on='partner')
-
-#df_pivot['subject_last_mail'] = pd.merge(df_pivot,temp,how='left',on='partner')['subject']
 df_pivot['Utolsó mail óta eltelt napok'] = (current_date - pd.to_datetime(df_pivot['date'])).dt.days
 
 df_pivot.info()
