@@ -36,7 +36,7 @@ def WriteExcel():
     
 # folder codes - https://learn.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
 
-print(pd. __version__)
+
 
 #Get folder inbox
 salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2)
@@ -92,8 +92,9 @@ for i in range(inbox_length):
     email = {'partner':sender, 'recip':searched_email, 'subject':subject, 'date':date, 'státusz': bitvalaszolt}
     df_email_temp = pd.DataFrame([email])
     df = pd.concat([df,df_email_temp], ignore_index = True)
+
     
-statusz
+
 
 #Filter Teams invitations
 df.dropna(subset=['partner'], inplace = True)
