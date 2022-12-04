@@ -14,7 +14,7 @@ import numpy as np
 
 outlook = client.Dispatch("Outlook.Application")
 mapi = outlook.GetNamespace("MAPI")
-df = pd.DataFrame(columns = ['partner','subject', 'date','time','státusz'])
+df = pd.DataFrame(columns = ['partner','recip','subject', 'date','státusz'])
 current_date = datetime.now()
 
 # read an email
@@ -36,76 +36,83 @@ def WriteExcel():
     
 # folder codes - https://learn.microsoft.com/en-us/office/vba/api/outlook.oldefaultfolders
 
+print(pd. __version__)
 
 #Get folder inbox
 salesMessagesIn = mapi.Folders("bit-bce-salesteam@bce.bitclub.hu").Folders(2)
 
 inbox_messages = salesMessagesIn.Items
-inbox_messages.Sort('ReceivedTime')
+inbox_messages.Sort('ReceivedTime', Descending = True)
 inbox_length = len(inbox_messages)
 
 statusz = {}
 
+type(inbox_messages)
+
 
 for i in range(inbox_length):
     try:
-        print("valami")
         sender = getSenderAddress(inbox_messages[i])
+        print(sender)
     except:
         print("Semmi")
         sender = None
     bitvalaszolt = False
     try:
         if "bitclub.hu" in sender:
-            recip = inbox_messages[i].Recipients[0]
-            if recip.AddressEntry.Type == "EX":
-                recip = str(recip.AddressEntry.GetExchangeUser().PrimarySmtpAddress)
+            searched_email = inbox_messages[i].Recipients[i]
+            print("BIT a küldő")
+            if searched_email.AddressEntry.Type == "EX":
+                searched_email = str(searched_email.AddressEntry.GetExchangeUser().PrimarySmtpAddress)
             else:
-                recip = str(recip.AddressEntry.Address)
-            print(type(recip))
-            if recip not in statusz:
-                
-                statusz[recip] = "Bit válaszolt"
+                searched_email = str(searched_email.AddressEntry.Address)
+            if searched_email not in statusz:
+                print("Még nem merült fel")
+                statusz[searched_email] = "Bit válaszolt"
                 bitvalaszolt = True
+            else:
+                print("Már volt ilyen email")
+                pass
         else:
+            print("Partner a küldő")
+            searched_email = inbox_messages[i].Recipients[i]
             if sender not in statusz:
+                print("Még nem volt ilyen partner")
                 statusz[sender] = "Partner válaszolt" 
                 bitvalaszolt = False
+            else:
+                pass
     except:
         pass
     subject = inbox_messages[i].Subject
     try:
         date = inbox_messages[i].SentOn.strftime("%Y.%m.%d")
-        time = inbox_messages[i].SentOn.strftime("%H:%M:%S")
     except:
         date = ""
-        time = ""
-    email = {'partner':sender, 'subject':subject, 'date':date, 'time':time, 'státusz': bitvalaszolt}
+    email = {'partner':sender, 'recip':searched_email, 'subject':subject, 'date':date, 'státusz': bitvalaszolt}
     df_email_temp = pd.DataFrame([email])
     df = pd.concat([df,df_email_temp], ignore_index = True)
     
-
+statusz
 
 #Filter Teams invitations
 df.dropna(subset=['partner'], inplace = True)
-
+#☺ & ~df['partner'].str.contains("bitclub")
 #Filter other Teams and Akrivis messages
-df = df.loc[~df['partner'].str.contains("teams.microsoft") & ~df['partner'].str.contains("akrivis")]
+df = df.loc[~df['partner'].str.contains("teams.microsoft")]
 
-df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','time','subject','státusz'], aggfunc = np.max)
+df_pivot = pd.pivot_table(df,index=['partner'], values = ['date','subject','státusz'], aggfunc = np.max)
 df_pivot = df_pivot.reset_index()
 df_pivot['days_since_last_mail'] = (current_date - pd.to_datetime(df_pivot['date'])).dt.days
-df_pivot = df_pivot.reindex(columns = ["partner","date","time","subject","days_since_last_mail","státusz"])
+df_pivot = df_pivot.reindex(columns = ["partner","date","subject","days_since_last_mail","státusz"])
 
 
 # df_pivot.info()
 # df.info()
 
-WriteExcel()
+#WriteExcel()
 
-#To do: a bit-sales email inboxára szűrve scraping
-#Kiírni Excelbe: distincten partnemailek, utolsó email subject, utolsó email dátum - idő, utolsó email óta eltelt napok száma, STÁTUSZ (lényeg)
-#STÁTUSZ lehetséges értékek: partner válaszolt, bit válaszolt
+
 
 
 # print('number of emails in inbox: '+str(length))
