@@ -239,8 +239,8 @@ def write_txt_chat2():
                 p = p.split('@')
                 p = p [1]
                 #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
-                if ("@ce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
-                    mBody = write_file(mBody, p, nowdate)
+                if ("bce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
+                    write_file(mBody, p, nowdate)
 
             else:
                 p = str(r.AddressEntry.Address)
@@ -249,7 +249,7 @@ def write_txt_chat2():
 
                 #Ha a CC nem bites mailcím, akkor az ezzel a névvel ellátitt fájlba beleírjuk az üzenetet/létrehozunk egy ilyen nevű fájlt
                 if ("bce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
-                    mBody = write_file(mBody, p, nowdate)
+                    write_file(mBody, p, nowdate)
         
         try:
             if m.SenderEmailType == "EX":
@@ -261,7 +261,7 @@ def write_txt_chat2():
             p = p[1]
 
             if ("bce.bitclub.hu" not in p) and ("bitclub.hu" not in p) and ("ybg.hu" not in p) and ("ubc-corvinus.hu" not in p):
-                mBody = write_file(mBody, p, nowdate)
+                write_file(mBody, p, nowdate)
         except:
             print(p)
             print("Nem rendes mail.")
