@@ -6,7 +6,6 @@ Created on Fri Nov 18 15:47:01 2022
 """
 
 import win32com.client as client
-import xlsxwriter
 from datetime import datetime
 from datetime import date
 import pandas as pd
@@ -25,7 +24,7 @@ def getSenderAddress(msg):
         else:
             return msg.SenderEmailAddress
 
-def WriteExcel():
+def WriteExcel(df_pivot):
     try:
         now =str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         df_pivot.to_excel("Status_"+now+".xlsx", index = False)
@@ -111,7 +110,7 @@ df_pivot = df_pivot.reindex(columns = ["partner","date","subject","days_since_la
 # df_pivot.info()
 # df.info()
 
-#WriteExcel()
+WriteExcel(df_pivot)
 
 
 
