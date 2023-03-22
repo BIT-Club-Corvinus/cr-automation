@@ -126,3 +126,6 @@ for m in salesMessagesIn:
     
 workbook.close()
     
+    
+# Bites mail oszlop
+# Gmailes
